@@ -213,7 +213,7 @@ export const GroupOverview = () => {
             <div className="space-y-3">
               {currentGroup.members.length > 0 ? (
                 currentGroup.members.map((member, index) => {
-                  const balance = calculateMemberBalance(member.id, currentGroup.expenses);
+                  const balance = calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || []);
                   const isPositive = balance > 0;
                   const isNeutral = Math.abs(balance) < 0.01;
                   

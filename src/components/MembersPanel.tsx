@@ -55,7 +55,7 @@ export const MembersPanel = () => {
 
   // Optimized member stats calculator
   const getMemberStats = (member: Member) => {
-    const balance = calculateMemberBalance(member.id, currentGroup.expenses);
+    const balance = calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || []);
     const expenses = getMemberExpenses(member.id, currentGroup.expenses);
     const totalExpenses = Array.isArray(expenses) ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0;
     const isNeutral = Math.abs(balance) < 0.01;
