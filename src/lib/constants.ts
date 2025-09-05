@@ -21,12 +21,12 @@ export const COLORS = {
     success: 'from-green-600 to-emerald-600',
     warning: 'from-yellow-500 to-orange-500',
     danger: 'from-red-600 to-pink-600',
-    neutral: 'from-gray-50 to-gray-100'
+    neutral: 'from-blue-50 to-blue-100'
   },
   status: {
     positive: 'green',
     negative: 'red', 
-    neutral: 'gray'
+    neutral: 'blue'
   }
 } as const;
 

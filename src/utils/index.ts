@@ -25,11 +25,12 @@ export const formatDate = (date: Date): string => {
   }).format(date);
 };
 
-import { Expense } from '@/types';
+import { Expense, PaidSettlement } from '@/types';
 
-export const calculateMemberBalance = (memberId: string, expenses: Expense[]): number => {
+export const calculateMemberBalance = (memberId: string, expenses: Expense[], paidSettlements: PaidSettlement[] = []): number => {
   let balance = 0;
   
+  // Calculate balance from expenses
   expenses.forEach(expense => {
     const perPersonAmount = expense.amount / expense.participants.length;
     
@@ -41,6 +42,19 @@ export const calculateMemberBalance = (memberId: string, expenses: Expense[]): n
     // If this member participated, they get debited their share
     if (expense.participants.includes(memberId)) {
       balance -= perPersonAmount;
+    }
+  });
+
+  // Account for paid settlements
+  paidSettlements.forEach(settlement => {
+    // If this member received money, reduce their credit (they were owed less)
+    if (settlement.to === memberId) {
+      balance -= settlement.amount;
+    }
+    
+    // If this member paid money, reduce their debt (they owe less)
+    if (settlement.from === memberId) {
+      balance += settlement.amount;
     }
   });
   

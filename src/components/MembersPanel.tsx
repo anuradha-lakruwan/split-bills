@@ -55,7 +55,7 @@ export const MembersPanel = () => {
 
   // Optimized member stats calculator
   const getMemberStats = (member: Member) => {
-    const balance = calculateMemberBalance(member.id, currentGroup.expenses);
+    const balance = calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || []);
     const expenses = getMemberExpenses(member.id, currentGroup.expenses);
     const totalExpenses = Array.isArray(expenses) ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0;
     const isNeutral = Math.abs(balance) < 0.01;
@@ -69,7 +69,7 @@ export const MembersPanel = () => {
       status: {
         variant,
         label: isNeutral ? 'Settled' : isPositive ? 'Owed Money' : 'Owes Money',
-        color: isNeutral ? 'gray' : isPositive ? 'green' : 'red'
+        color: isNeutral ? 'blue' : isPositive ? 'green' : 'red'
       }
     };
   };
@@ -82,7 +82,11 @@ export const MembersPanel = () => {
           <Icons.Users className="mr-3 text-blue-600" />
           Group Members
         </h2>
-        <UI.Button onClick={() => setIsAddingMember(true)} icon={Icons.Plus}>
+        <UI.Button 
+          onClick={() => setIsAddingMember(true)} 
+          icon={Icons.Plus}
+          className="shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           Add Member
         </UI.Button>
       </div>
@@ -90,10 +94,15 @@ export const MembersPanel = () => {
       {/* Add Member Form */}
       {isAddingMember && (
         <UI.Card className={ANIMATIONS.slideIn} gradient>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <Icons.Plus className="mr-2 text-green-600" />
-            Add New Member
-          </h3>
+          <div className="flex items-center mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+              <Icons.Plus className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add New Member</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Add someone to your expense group</p>
+            </div>
+          </div>
           
           <Form onSubmit={memberForm.handleSubmit}>
             <FormField
