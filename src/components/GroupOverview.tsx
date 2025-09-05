@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn } from '@/utils';
 import { Icons } from './Icons';
-import { Card, Badge, Avatar, EmptyState } from './UI';
+import { Card, Badge, Avatar, EmptyState, Button } from './UI';
 
 export const GroupOverview = () => {
   const { state, calculateSettlements } = useApp();
@@ -34,7 +34,7 @@ export const GroupOverview = () => {
   const { totalExpenses, settlements, recentExpenses, memberCount, expenseCount } = groupStats;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in">
       {/* Enhanced Group Info Header */}
       <Card gradient hover className="group">
         <div className="flex items-center justify-between">
@@ -70,9 +70,9 @@ export const GroupOverview = () => {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Enhanced Quick Stats */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="xl:col-span-2 space-y-6 lg:space-y-8">
           {/* Modern Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <Card hover className="group animate-slide-in-up [animation-delay:0.1s]">
@@ -193,7 +193,7 @@ export const GroupOverview = () => {
         </div>
 
         {/* Enhanced Member Balances */}
-        <div className="space-y-8">
+        <div className="space-y-6 lg:space-y-8">
           <Card className="animate-slide-in-right [animation-delay:0.5s]">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
@@ -271,20 +271,27 @@ export const GroupOverview = () => {
           {/* Enhanced Quick Settlements */}
           {settlements.length > 0 && (
             <Card className="animate-slide-in-right [animation-delay:0.6s]">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Icons.ArrowRight className="w-5 h-5 text-white" />
+              <div className="mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Icons.Calculator className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Suggested Settlements
+                    </h3>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Suggested Settlements
-                  </h3>
+                  <div className="flex items-center justify-center sm:justify-end">
+                    <div className="flex items-center space-x-2 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 rounded-full border border-orange-200 dark:border-orange-800">
+                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                        {settlements.length} pending
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <Badge variant="warning">
-                  {settlements.length} pending
-                </Badge>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-4">
                 {settlements.slice(0, 3).map((settlement, index) => {
                   const fromMember = currentGroup.members.find(m => m.id === settlement.from);
                   const toMember = currentGroup.members.find(m => m.id === settlement.to);
@@ -293,46 +300,83 @@ export const GroupOverview = () => {
                     <div 
                       key={index} 
                       className={cn(
-                        "p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300",
-                        "animate-fade-in-up"
+                        "p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700",
+                        "bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900",
+                        "hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md",
+                        "transition-all duration-300 group animate-fade-in-up overflow-hidden"
                       )}
                       style={{ animationDelay: `${0.7 + index * 0.1}s` }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center">
+                      {/* Mobile Layout */}
+                      <div className="block sm:hidden">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2" title={`${fromMember?.name} owes ${toMember?.name}`}>
                             <Avatar name={fromMember?.name || 'Unknown'} size="sm" />
-                            <Icons.ArrowRight className="w-4 h-4 text-gray-400 mx-2" />
+                            <Icons.ArrowRight className="w-4 h-4 text-blue-500" />
                             <Avatar name={toMember?.name || 'Unknown'} size="sm" />
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              <span className="font-semibold">{fromMember?.name}</span>
-                              {' owes '}
-                              <span className="font-semibold">{toMember?.name}</span>
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Settlement suggestion
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                              {formatCurrency(settlement.amount)}
                             </p>
                           </div>
+                          <Button 
+                            variant="success" 
+                            size="sm"
+                            icon={Icons.Check}
+                            className="text-xs px-2 py-1 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
+                            onClick={() => {
+                              console.log('Settlement marked as paid:', settlement);
+                            }}
+                          >
+                            Mark Paid
+                          </Button>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      </div>
+
+                      {/* Desktop Layout */}
+                      <div className="hidden sm:flex items-center justify-between">
+                        <div className="flex items-center space-x-3" title={`${fromMember?.name} owes ${toMember?.name}`}>
+                          <Avatar name={fromMember?.name || 'Unknown'} size="md" />
+                          <Icons.ArrowRight className="w-5 h-5 text-blue-500 group-hover:text-blue-600 transition-colors" />
+                          <Avatar name={toMember?.name || 'Unknown'} size="md" />
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
                             {formatCurrency(settlement.amount)}
                           </p>
-                          <Badge variant="secondary" size="sm">
-                            Pay now
-                          </Badge>
+                          <Button 
+                            variant="success" 
+                            size="sm"
+                            icon={Icons.Check}
+                            className="text-sm px-3 py-2 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
+                            onClick={() => {
+                              console.log('Settlement marked as paid:', settlement);
+                            }}
+                          >
+                            Mark Paid
+                          </Button>
                         </div>
                       </div>
                     </div>
                   );
                 })}
                 {settlements.length > 3 && (
-                  <div className="text-center pt-2">
-                    <Badge variant="secondary">
-                      +{settlements.length - 3} more settlements
-                    </Badge>
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-center">
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        icon={Icons.ChevronDown}
+                        className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border-0"
+                        onClick={() => {
+                          // Handle showing more settlements
+                          console.log('Show more settlements');
+                        }}
+                      >
+                        +{settlements.length - 3} more
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
