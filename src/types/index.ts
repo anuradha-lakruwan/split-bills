@@ -20,6 +20,15 @@ export interface Settlement {
   from: string; // Member ID
   to: string; // Member ID
   amount: number;
+  id?: string; // Optional ID for tracking paid settlements
+}
+
+export interface PaidSettlement {
+  id: string;
+  from: string; // Member ID
+  to: string; // Member ID
+  amount: number;
+  datePaid: Date;
 }
 
 export interface Group {
@@ -28,6 +37,7 @@ export interface Group {
   description?: string;
   members: Member[];
   expenses: Expense[];
+  paidSettlements: PaidSettlement[];
   createdAt: Date;
 }
 
