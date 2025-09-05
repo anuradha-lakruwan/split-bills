@@ -9,6 +9,14 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+/**
+ * Utility function to combine class names conditionally
+ * Similar to clsx/classnames but simpler for our needs
+ */
+export const cn = (...classes: (string | undefined | null | false)[]): string => {
+  return classes.filter(Boolean).join(' ');
+};
+
 export const formatDate = (date: Date): string => {
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
