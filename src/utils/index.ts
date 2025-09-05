@@ -28,52 +28,128 @@ export const formatDate = (date: Date): string => {
 import { Expense, PaidSettlement } from '@/types';
 
 export const calculateMemberBalance = (memberId: string, expenses: Expense[], paidSettlements: PaidSettlement[] = []): number => {
-  let balance = 0;
+  // Use integer arithmetic (cents) to avoid floating point issues
+  let balanceCents = 0;
   
-  // Calculate balance from expenses
+  // Validate inputs
+  if (!memberId || !Array.isArray(expenses)) {
+    return 0;
+  }
+  
+  // Calculate balance from expenses (in cents)
   expenses.forEach(expense => {
-    const perPersonAmount = expense.amount / expense.participants.length;
+    // Validate expense data
+    if (!expense || typeof expense.amount !== 'number' || !Array.isArray(expense.participants) || expense.participants.length === 0) {
+      return; // Skip invalid expenses
+    }
+    
+    const expenseAmountCents = Math.round(expense.amount * 100);
+    const perPersonAmountCents = Math.round(expenseAmountCents / expense.participants.length);
     
     // If this member paid, they get credited
     if (expense.paidBy === memberId) {
-      balance += expense.amount;
+      balanceCents += expenseAmountCents;
     }
     
     // If this member participated, they get debited their share
     if (expense.participants.includes(memberId)) {
-      balance -= perPersonAmount;
+      balanceCents -= perPersonAmountCents;
     }
   });
 
-  // Account for paid settlements
-  paidSettlements.forEach(settlement => {
-    // If this member received money, reduce their credit (they were owed less)
-    if (settlement.to === memberId) {
-      balance -= settlement.amount;
-    }
-    
-    // If this member paid money, reduce their debt (they owe less)
-    if (settlement.from === memberId) {
-      balance += settlement.amount;
-    }
-  });
+  // Account for paid settlements (in cents)
+  if (Array.isArray(paidSettlements)) {
+    paidSettlements.forEach(settlement => {
+      // Validate settlement data
+      if (!settlement || typeof settlement.amount !== 'number') {
+        return; // Skip invalid settlements
+      }
+      
+      const settlementAmountCents = Math.round(settlement.amount * 100);
+      
+      // If this member received money, reduce their credit (they were owed less)
+      if (settlement.to === memberId) {
+        balanceCents -= settlementAmountCents;
+      }
+      
+      // If this member paid money, reduce their debt (they owe less)
+      if (settlement.from === memberId) {
+        balanceCents += settlementAmountCents;
+      }
+    });
+  }
   
-  return Math.round(balance * 100) / 100;
+  // Convert back to dollars and sanitize the result
+  return sanitizeAmount(balanceCents / 100);
 };
 
 export const getTotalExpenses = (expenses: Expense[]): number => {
-  return expenses.reduce((total, expense) => total + expense.amount, 0);
+  if (!Array.isArray(expenses)) {
+    return 0;
+  }
+  
+  const total = expenses
+    .filter(validateExpense)
+    .reduce((sum, expense) => sum + expense.amount, 0);
+    
+  return sanitizeAmount(total);
 };
 
 export const getMemberExpenses = (memberId: string, expenses: Expense[]): number => {
-  return expenses
-    .filter(expense => expense.paidBy === memberId)
-    .reduce((total, expense) => total + expense.amount, 0);
+  if (!memberId || !Array.isArray(expenses)) {
+    return 0;
+  }
+  
+  const total = expenses
+    .filter(expense => validateExpense(expense) && expense.paidBy === memberId)
+    .reduce((sum, expense) => sum + expense.amount, 0);
+    
+  return sanitizeAmount(total);
 };
 
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+// Utility to ensure monetary values are properly formatted
+export const sanitizeAmount = (amount: number): number => {
+  // Handle NaN, Infinity, and negative values
+  if (!isFinite(amount) || isNaN(amount)) {
+    return 0;
+  }
+  
+  // Round to 2 decimal places to avoid floating point issues
+  return Math.round(Math.max(0, amount) * 100) / 100;
+};
+
+// Utility to validate expense data
+export const validateExpense = (expense: Expense): boolean => {
+  return !!(
+    expense &&
+    expense.id &&
+    expense.description &&
+    typeof expense.amount === 'number' &&
+    expense.amount > 0 &&
+    expense.paidBy &&
+    Array.isArray(expense.participants) &&
+    expense.participants.length > 0 &&
+    expense.participants.every(p => typeof p === 'string' && p.trim().length > 0)
+  );
+};
+
+// Utility to validate settlement data
+export const validateSettlement = (settlement: PaidSettlement): boolean => {
+  return !!(
+    settlement &&
+    settlement.id &&
+    settlement.from &&
+    settlement.to &&
+    settlement.from !== settlement.to &&
+    typeof settlement.amount === 'number' &&
+    settlement.amount > 0 &&
+    settlement.datePaid instanceof Date
+  );
 };
 
 export const debounce = <T extends (...args: unknown[]) => void>(

@@ -199,21 +199,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedGroups = localStorage.getItem('splitbills-groups');
     if (savedGroups) {
       try {
-        const groups = JSON.parse(savedGroups).map((group: Group & { createdAt: string; expenses: Array<Expense & { date: string }>; paidSettlements?: Array<PaidSettlement & { datePaid: string }> }) => ({
-          ...group,
-          createdAt: new Date(group.createdAt),
-          expenses: group.expenses.map((expense: Expense & { date: string }) => ({
-            ...expense,
-            date: new Date(expense.date)
-          })),
-          paidSettlements: (group.paidSettlements || []).map((settlement: PaidSettlement & { datePaid: string }) => ({
-            ...settlement,
-            datePaid: new Date(settlement.datePaid)
-          }))
-        }));
+        const parsedData = JSON.parse(savedGroups);
+        
+        // Validate that parsedData is an array
+        if (!Array.isArray(parsedData)) {
+          console.warn('Invalid groups data in localStorage, expected array');
+          return;
+        }
+        
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        const groups = parsedData
+          .filter((item: unknown) => item && typeof item === 'object' && 'id' in item) // Filter out invalid groups
+          .map((group: any) => {
+            // Validate and sanitize group data
+            const sanitizedGroup: Group = {
+              id: group.id || '',
+              name: group.name || '',
+              description: group.description || '',
+              createdAt: group.createdAt ? new Date(group.createdAt) : new Date(),
+              members: Array.isArray(group.members) ? group.members.filter((m: any) => m && m.id) : [],
+              expenses: Array.isArray(group.expenses) ? group.expenses
+                .filter((expense: any) => 
+                  expense && 
+                  expense.id && 
+                  typeof expense.amount === 'number' && 
+                  expense.amount >= 0 &&
+                  Array.isArray(expense.participants) && 
+                  expense.participants.length > 0 &&
+                  expense.paidBy
+                )
+                .map((expense: any) => ({
+                  id: expense.id,
+                  description: expense.description || '',
+                  amount: Math.round(expense.amount * 100) / 100, // Ensure 2 decimal places
+                  paidBy: expense.paidBy,
+                  participants: expense.participants,
+                  category: expense.category || 'other',
+                  date: expense.date ? new Date(expense.date) : new Date(),
+                  receipt: expense.receipt
+                })) : [],
+              paidSettlements: Array.isArray(group.paidSettlements) ? group.paidSettlements
+                .filter((settlement: any) => 
+                  settlement && 
+                  settlement.id && 
+                  settlement.from && 
+                  settlement.to && 
+                  typeof settlement.amount === 'number' && 
+                  settlement.amount > 0
+                )
+                .map((settlement: any) => ({
+                  id: settlement.id,
+                  from: settlement.from,
+                  to: settlement.to,
+                  amount: Math.round(settlement.amount * 100) / 100, // Ensure 2 decimal places
+                  datePaid: settlement.datePaid ? new Date(settlement.datePaid) : new Date()
+                })) : []
+            };
+            
+            return sanitizedGroup;
+          });
+        /* eslint-enable @typescript-eslint/no-explicit-any */
+          
         dispatch({ type: 'SET_GROUPS', payload: groups });
       } catch (error) {
         console.error('Failed to load groups from localStorage:', error);
+        // Clear corrupted data
+        localStorage.removeItem('splitbills-groups');
       }
     }
   }, []);
@@ -226,61 +277,110 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [state.groups]);
 
   const calculateSettlements = (): Settlement[] => {
-    if (!state.currentGroup) return [];
+    if (!state.currentGroup || !Array.isArray(state.currentGroup.members)) {
+      return [];
+    }
 
-    const balances: Record<string, number> = {};
+    // Use cents for precision throughout calculations
+    const balancesCents: Record<string, number> = {};
     
     // Initialize balances for all members
     state.currentGroup.members.forEach(member => {
-      balances[member.id] = 0;
+      if (member && member.id) {
+        balancesCents[member.id] = 0;
+      }
     });
 
-    // Calculate net balances for each member from expenses
-    state.currentGroup.expenses.forEach(expense => {
-      const perPersonAmount = expense.amount / expense.participants.length;
-      
-      // Person who paid gets credited
-      balances[expense.paidBy] += expense.amount;
-      
-      // Each participant gets debited their share
-      expense.participants.forEach(participantId => {
-        balances[participantId] -= perPersonAmount;
-      });
-    });
-
-    // Account for paid settlements
-    if (state.currentGroup.paidSettlements) {
-      state.currentGroup.paidSettlements.forEach(paidSettlement => {
-        // The person who received money should have less credit
-        balances[paidSettlement.to] -= paidSettlement.amount;
-        // The person who paid should have less debt
-        balances[paidSettlement.from] += paidSettlement.amount;
+    // Calculate net balances for each member from expenses (in cents)
+    if (Array.isArray(state.currentGroup.expenses)) {
+      state.currentGroup.expenses.forEach(expense => {
+        // Validate expense data
+        if (!expense || typeof expense.amount !== 'number' || !Array.isArray(expense.participants) || expense.participants.length === 0) {
+          return; // Skip invalid expenses
+        }
+        
+        const expenseAmountCents = Math.round(expense.amount * 100);
+        const perPersonAmountCents = Math.round(expenseAmountCents / expense.participants.length);
+        
+        // Person who paid gets credited
+        if (expense.paidBy && balancesCents.hasOwnProperty(expense.paidBy)) {
+          balancesCents[expense.paidBy] += expenseAmountCents;
+        }
+        
+        // Each participant gets debited their share
+        expense.participants.forEach(participantId => {
+          if (participantId && balancesCents.hasOwnProperty(participantId)) {
+            balancesCents[participantId] -= perPersonAmountCents;
+          }
+        });
       });
     }
 
-    // Convert balances to settlements
-    const settlements: Settlement[] = [];
-    const creditors = Object.entries(balances).filter(([, balance]) => balance > 0.01);
-    const debtors = Object.entries(balances).filter(([, balance]) => balance < -0.01);
-
-    creditors.forEach(([creditorId, credit]) => {
-      let remainingCredit = credit;
-      
-      debtors.forEach(([debtorId, debt]) => {
-        if (remainingCredit > 0.01 && debt < -0.01) {
-          const settlementAmount = Math.min(remainingCredit, Math.abs(debt));
-          
-          settlements.push({
-            from: debtorId,
-            to: creditorId,
-            amount: Math.round(settlementAmount * 100) / 100
-          });
-          
-          remainingCredit -= settlementAmount;
-          balances[debtorId] += settlementAmount;
+    // Account for paid settlements (in cents)
+    if (Array.isArray(state.currentGroup.paidSettlements)) {
+      state.currentGroup.paidSettlements.forEach(paidSettlement => {
+        // Validate settlement data
+        if (!paidSettlement || typeof paidSettlement.amount !== 'number') {
+          return; // Skip invalid settlements
+        }
+        
+        const settlementAmountCents = Math.round(paidSettlement.amount * 100);
+        
+        // The person who received money should have less credit
+        if (paidSettlement.to && balancesCents.hasOwnProperty(paidSettlement.to)) {
+          balancesCents[paidSettlement.to] -= settlementAmountCents;
+        }
+        
+        // The person who paid should have less debt
+        if (paidSettlement.from && balancesCents.hasOwnProperty(paidSettlement.from)) {
+          balancesCents[paidSettlement.from] += settlementAmountCents;
         }
       });
+    }
+
+    // Convert back to dollars
+    const balances: Record<string, number> = {};
+    Object.entries(balancesCents).forEach(([id, amountCents]) => {
+      balances[id] = Math.round(amountCents) / 100;
     });
+
+    // Convert balances to settlements
+    const settlements: Settlement[] = [];
+    
+    // Create copies of creditors and debtors to avoid mutation issues
+    const creditors = Object.entries(balances)
+      .filter(([, balance]) => balance > 0.01)
+      .map(([id, amount]) => ({ id, amount }))
+      .sort((a, b) => b.amount - a.amount); // Sort by highest amount first
+    
+    const debtors = Object.entries(balances)
+      .filter(([, balance]) => balance < -0.01)
+      .map(([id, amount]) => ({ id, amount: Math.abs(amount) }))
+      .sort((a, b) => b.amount - a.amount); // Sort by highest debt first
+
+    // Use working copies to avoid mutating the original data
+    const workingCreditors = creditors.map(c => ({ ...c }));
+    const workingDebtors = debtors.map(d => ({ ...d }));
+
+    // Calculate settlements without modifying original balances
+    for (const creditor of workingCreditors) {
+      for (const debtor of workingDebtors) {
+        if (creditor.amount > 0.01 && debtor.amount > 0.01) {
+          const settlementAmount = Math.min(creditor.amount, debtor.amount);
+          
+          if (settlementAmount > 0.01) {
+            settlements.push({
+              from: debtor.id,
+              to: creditor.id,
+              amount: Math.round(settlementAmount * 100) / 100
+            });
+            
+            creditor.amount -= settlementAmount;
+            debtor.amount -= settlementAmount;
+          }
+        }
+      }
+    }
 
     return settlements;
   };
