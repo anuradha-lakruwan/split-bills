@@ -131,36 +131,60 @@ export const WelcomeScreen = () => {
         </div>
 
         {/* How It Works Section */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="mb-20">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               How It Works
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-lg text-gray-600 dark:text-gray-300">
               Get started in 4 simple steps
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-4">
             {steps.map((step, index) => (
-              <div 
-                key={index}
-                className={`text-center animate-fade-in-up [animation-delay:${0.5 + index * 0.1}s]`}
-              >
-                <div className="relative mb-6">
-                  <div className="w-16 h-16 mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-4 border-blue-100 dark:border-blue-900 flex items-center justify-center">
-                    <step.icon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div key={index} className="flex flex-col lg:flex-row items-center">
+                {/* Step Card */}
+                <div className={`text-center animate-fade-in-up [animation-delay:${0.5 + index * 0.1}s] px-4`}>
+                  <div className="relative mb-6">
+                    <div className="w-24 h-24 mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-xl border-4 border-blue-100 dark:border-blue-900 flex items-center justify-center hover:scale-105 transition-transform duration-300">
+                      <step.icon className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                      {index + 1}
+                    </div>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {index + 1}
-                  </div>
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-xl">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 max-w-40 mx-auto leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {step.description}
-                </p>
+                
+                {/* Arrow (except for last item) */}
+                {index < steps.length - 1 && (
+                  <div className={`flex-shrink-0 animate-fade-in-up [animation-delay:${0.6 + index * 0.1}s]`}>
+                    {/* Mobile: Down Arrow */}
+                    <div className="lg:hidden mx-auto my-6">
+                      <div className="w-14 h-14 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-xl animate-pulse-subtle">
+                        <Icons.ChevronDown className="w-6 h-6 text-white animate-bounce" />
+                      </div>
+                      <div className="w-1 h-8 bg-gradient-to-b from-blue-300 to-purple-300 mx-auto mt-2 rounded-full opacity-60"></div>
+                    </div>
+                    
+                    {/* Desktop: Right Arrow */}
+                    <div className="hidden lg:block mx-8">
+                      <div className="flex items-center">
+                        <div className="w-16 h-1 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-60"></div>
+                        <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-all duration-300 animate-pulse-subtle mx-2">
+                          <Icons.ArrowRight className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="w-16 h-1 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-60"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
