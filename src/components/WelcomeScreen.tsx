@@ -74,6 +74,7 @@ export const WelcomeScreen = () => {
       description: groupDescription.trim(),
       members: [],
       expenses: [],
+      paidSettlements: [],
       createdAt: new Date(),
     };
 

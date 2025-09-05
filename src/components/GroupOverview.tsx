@@ -7,7 +7,7 @@ import { Icons } from './Icons';
 import { Card, Badge, Avatar, EmptyState, Button } from './UI';
 
 export const GroupOverview = () => {
-  const { state, calculateSettlements } = useApp();
+  const { state, dispatch, calculateSettlements } = useApp();
   const { currentGroup } = state;
 
   // Memoized calculations for performance
@@ -326,7 +326,13 @@ export const GroupOverview = () => {
                             icon={Icons.Check}
                             className="text-xs px-2 py-1 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
                             onClick={() => {
-                              console.log('Settlement marked as paid:', settlement);
+                              dispatch({ 
+                                type: 'MARK_SETTLEMENT_PAID', 
+                                payload: { 
+                                  groupId: currentGroup.id, 
+                                  settlement 
+                                } 
+                              });
                             }}
                           >
                             Mark Paid
@@ -351,7 +357,13 @@ export const GroupOverview = () => {
                             icon={Icons.Check}
                             className="text-sm px-3 py-2 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
                             onClick={() => {
-                              console.log('Settlement marked as paid:', settlement);
+                              dispatch({ 
+                                type: 'MARK_SETTLEMENT_PAID', 
+                                payload: { 
+                                  groupId: currentGroup.id, 
+                                  settlement 
+                                } 
+                              });
                             }}
                           >
                             Mark Paid

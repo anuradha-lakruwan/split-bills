@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { Group, Member, Expense, Settlement } from '@/types';
+import { Group, Member, Expense, Settlement, PaidSettlement } from '@/types';
 
 interface AppState {
   groups: Group[];
@@ -19,7 +19,8 @@ type AppAction =
   | { type: 'ADD_EXPENSE'; payload: { groupId: string; expense: Expense } }
   | { type: 'UPDATE_EXPENSE'; payload: { groupId: string; expense: Expense } }
   | { type: 'DELETE_EXPENSE'; payload: { groupId: string; expenseId: string } }
-  | { type: 'UPDATE_GROUP'; payload: Group };
+  | { type: 'UPDATE_GROUP'; payload: Group }
+  | { type: 'MARK_SETTLEMENT_PAID'; payload: { groupId: string; settlement: Settlement } };
 
 const initialState: AppState = {
   groups: [],
@@ -142,6 +143,35 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         currentGroup: state.currentGroup?.id === action.payload.id ? action.payload : state.currentGroup
       };
     
+    case 'MARK_SETTLEMENT_PAID':
+      const paidSettlement: PaidSettlement = {
+        id: Date.now().toString(),
+        from: action.payload.settlement.from,
+        to: action.payload.settlement.to,
+        amount: action.payload.settlement.amount,
+        datePaid: new Date()
+      };
+      
+      const updatedGroupsSettlement = state.groups.map(group =>
+        group.id === action.payload.groupId
+          ? { 
+              ...group, 
+              paidSettlements: [...(group.paidSettlements || []), paidSettlement]
+            }
+          : group
+      );
+      
+      return {
+        ...state,
+        groups: updatedGroupsSettlement,
+        currentGroup: state.currentGroup?.id === action.payload.groupId
+          ? { 
+              ...state.currentGroup, 
+              paidSettlements: [...(state.currentGroup.paidSettlements || []), paidSettlement]
+            }
+          : state.currentGroup
+      };
+    
     default:
       return state;
   }
@@ -169,12 +199,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedGroups = localStorage.getItem('splitbills-groups');
     if (savedGroups) {
       try {
-        const groups = JSON.parse(savedGroups).map((group: Group & { createdAt: string; expenses: Array<Expense & { date: string }> }) => ({
+        const groups = JSON.parse(savedGroups).map((group: Group & { createdAt: string; expenses: Array<Expense & { date: string }>; paidSettlements?: Array<PaidSettlement & { datePaid: string }> }) => ({
           ...group,
           createdAt: new Date(group.createdAt),
           expenses: group.expenses.map((expense: Expense & { date: string }) => ({
             ...expense,
             date: new Date(expense.date)
+          })),
+          paidSettlements: (group.paidSettlements || []).map((settlement: PaidSettlement & { datePaid: string }) => ({
+            ...settlement,
+            datePaid: new Date(settlement.datePaid)
           }))
         }));
         dispatch({ type: 'SET_GROUPS', payload: groups });
@@ -201,7 +235,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       balances[member.id] = 0;
     });
 
-    // Calculate net balances for each member
+    // Calculate net balances for each member from expenses
     state.currentGroup.expenses.forEach(expense => {
       const perPersonAmount = expense.amount / expense.participants.length;
       
@@ -213,6 +247,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         balances[participantId] -= perPersonAmount;
       });
     });
+
+    // Account for paid settlements
+    if (state.currentGroup.paidSettlements) {
+      state.currentGroup.paidSettlements.forEach(paidSettlement => {
+        // The person who received money should have less credit
+        balances[paidSettlement.to] -= paidSettlement.amount;
+        // The person who paid should have less debt
+        balances[paidSettlement.from] += paidSettlement.amount;
+      });
+    }
 
     // Convert balances to settlements
     const settlements: Settlement[] = [];

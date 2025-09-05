@@ -24,6 +24,7 @@ export const GroupSelector = () => {
       name: newGroupName.trim(),
       members: [],
       expenses: [],
+      paidSettlements: [],
       createdAt: new Date(),
     };
 
