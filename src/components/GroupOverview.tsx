@@ -5,10 +5,12 @@ import { useApp } from '@/context/AppContext';
 import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn } from '@/utils';
 import { Icons } from './Icons';
 import { Card, Badge, Avatar, EmptyState, Button } from './UI';
+import { useSettlement } from '@/hooks/useSettlement';
 
 export const GroupOverview = () => {
-  const { state, dispatch, calculateSettlements } = useApp();
+  const { state, calculateSettlements } = useApp();
   const { currentGroup } = state;
+  const { markSettlementAsPaid } = useSettlement();
 
   // Memoized calculations for performance
   const groupStats = useMemo(() => {
@@ -325,15 +327,7 @@ export const GroupOverview = () => {
                             size="sm"
                             icon={Icons.Check}
                             className="text-xs px-2 py-1 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
-                            onClick={() => {
-                              dispatch({ 
-                                type: 'MARK_SETTLEMENT_PAID', 
-                                payload: { 
-                                  groupId: currentGroup.id, 
-                                  settlement 
-                                } 
-                              });
-                            }}
+                            onClick={() => markSettlementAsPaid(settlement)}
                           >
                             Mark Paid
                           </Button>
@@ -356,15 +350,7 @@ export const GroupOverview = () => {
                             size="sm"
                             icon={Icons.Check}
                             className="text-sm px-3 py-2 shadow-sm hover:shadow-md !transform-none hover:!transform-none hover:!scale-100"
-                            onClick={() => {
-                              dispatch({ 
-                                type: 'MARK_SETTLEMENT_PAID', 
-                                payload: { 
-                                  groupId: currentGroup.id, 
-                                  settlement 
-                                } 
-                              });
-                            }}
+                            onClick={() => markSettlementAsPaid(settlement)}
                           >
                             Mark Paid
                           </Button>
