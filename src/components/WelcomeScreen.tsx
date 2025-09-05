@@ -1,15 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { generateId } from '@/utils';
 import { Group } from '@/types';
+import { Icons } from './Icons';
 
 export const WelcomeScreen = () => {
   const { dispatch } = useApp();
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const features = [
+    {
+      icon: "👥",
+      title: "Add group members",
+      description: "Invite friends and track their expenses"
+    },
+    {
+      icon: "💰",
+      title: "Split bills equally",
+      description: "Or customize shares for different amounts"
+    },
+    {
+      icon: "📊",
+      title: "See who owes whom",
+      description: "Clear overview of all balances"
+    },
+    {
+      icon: "📈",
+      title: "Export summaries",
+      description: "Download expense reports anytime"
+    }
+  ];
+
+  // Cycle through features
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev + 1) % features.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [features.length]);
 
   const handleCreateGroup = () => {
     if (!groupName.trim()) return;
@@ -30,103 +63,105 @@ export const WelcomeScreen = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-            <svg
-              className="h-8 w-8 text-blue-600 dark:text-blue-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
+        <div className="absolute -top-4 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl w-full">
+        <div className="text-center animate-fadeIn mb-12">
+          <div className="mx-auto h-20 w-20 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg animate-bounce-light mb-8">
+            <Icons.CreditCard className="h-10 w-10 text-white" />
           </div>
-          <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
             Welcome to SplitBills
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Split expenses effortlessly with friends, roommates, and travel groups
           </p>
         </div>
 
-        <div className="mt-8 space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="group-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Group Name
-              </label>
-              <input
-                id="group-name"
-                type="text"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-                placeholder="e.g., Weekend Trip, House Expenses"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white sm:text-sm"
-                maxLength={50}
-              />
+        {/* Feature showcase */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-slideIn">
+          {features.map((feature, index) => (
+            <div 
+              key={index}
+              className={`card card-interactive p-6 text-center transition-all duration-500 ${
+                index === currentStep ? 'animate-glow scale-105' : ''
+              }`}
+              style={{animationDelay: `${index * 0.1}s`}}
+            >
+              <div className="text-4xl mb-4 animate-bounce-light" style={{animationDelay: `${index * 0.2}s`}}>
+                {feature.icon}
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {feature.description}
+              </p>
             </div>
-            
-            <div>
-              <label htmlFor="group-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description (Optional)
-              </label>
-              <textarea
-                id="group-description"
-                value={groupDescription}
-                onChange={(e) => setGroupDescription(e.target.value)}
-                placeholder="Brief description of this group..."
-                rows={3}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white sm:text-sm"
-                maxLength={200}
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={handleCreateGroup}
-            disabled={!groupName.trim() || isCreating}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isCreating ? (
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              <svg
-                className="-ml-1 mr-2 h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-            )}
-            {isCreating ? 'Creating Group...' : 'Create Your First Group'}
-          </button>
+          ))}
         </div>
 
-        <div className="mt-8 space-y-4 text-center">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            <h3 className="font-medium text-gray-900 dark:text-white mb-2">Features:</h3>
-            <ul className="space-y-1">
-              <li>✓ Add group members and track their expenses</li>
-              <li>✓ Split bills equally or customize shares</li>
-              <li>✓ See who owes whom at a glance</li>
-              <li>✓ Export expense summaries</li>
-            </ul>
+        <div className="max-w-md mx-auto space-y-8 animate-scaleIn">
+          <div className="card p-8">
+            <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
+              Create Your First Group
+            </h2>
+            
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="group-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Group Name
+                </label>
+                <input
+                  id="group-name"
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="e.g., Weekend Trip, House Expenses"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white transition-all"
+                  maxLength={50}
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="group-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  id="group-description"
+                  value={groupDescription}
+                  onChange={(e) => setGroupDescription(e.target.value)}
+                  placeholder="Brief description of this group..."
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white transition-all resize-none"
+                  maxLength={200}
+                />
+              </div>
+
+              <button
+                onClick={handleCreateGroup}
+                disabled={!groupName.trim() || isCreating}
+                className="btn-primary w-full py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreating ? (
+                  <>
+                    <Icons.Spinner className="mr-3" />
+                    Creating Group...
+                  </>
+                ) : (
+                  <>
+                    <Icons.Plus className="mr-3" />
+                    Create Your First Group
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
