@@ -69,7 +69,7 @@ export const MembersPanel = () => {
       status: {
         variant,
         label: isNeutral ? 'Settled' : isPositive ? 'Owed Money' : 'Owes Money',
-        color: isNeutral ? 'gray' : isPositive ? 'green' : 'red'
+        color: isNeutral ? 'blue' : isPositive ? 'green' : 'red'
       }
     };
   };
