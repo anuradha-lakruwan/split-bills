@@ -268,7 +268,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </p>
     )}
     {action && (
-      <Button onClick={action.onClick} icon={Icons.Plus}>
+      <Button onClick={action.onClick} icon={Icons.Plus} size="lg" className="shadow-lg hover:shadow-xl transition-all duration-300">
         {action.label}
       </Button>
     )}
