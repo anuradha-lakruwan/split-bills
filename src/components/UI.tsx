@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Icons } from './Icons';
 import { cn } from '@/utils';
+import { generateAvatarInfo, hashStringToColor } from '@/utils/avatarUtils';
 import type { 
   ButtonProps, 
   CardProps, 
@@ -132,13 +133,15 @@ export const Badge: React.FC<BadgeProps & { children: React.ReactNode }> = ({
 };
 
 /**
- * Avatar Component with automatic color generation
+ * Enhanced Avatar Component with smart conflict resolution
  */
-export const Avatar: React.FC<AvatarProps> = ({ 
+const AvatarCore: React.FC<AvatarProps> = ({ 
   name, 
   src, 
   size = 'md', 
-  className = '' 
+  className = '',
+  member,
+  allMembers
 }) => {
   const sizeStyles = {
     sm: 'w-8 h-8 text-sm',
@@ -147,21 +150,9 @@ export const Avatar: React.FC<AvatarProps> = ({
     xl: 'w-16 h-16 text-2xl',
   } as const;
 
-  const gradientColors = [
-    'from-blue-500 to-purple-600',
-    'from-green-500 to-teal-600', 
-    'from-yellow-500 to-orange-600',
-    'from-pink-500 to-rose-600',
-    'from-indigo-500 to-blue-600',
-    'from-purple-500 to-pink-600',
-  ] as const;
-
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  const colorIndex = name.charCodeAt(0) % gradientColors.length;
-
   const baseStyles = cn(
     sizeStyles[size],
-    'rounded-full ring-2 ring-white dark:ring-gray-800 shadow-lg',
+    'rounded-full ring-2 ring-white dark:ring-gray-800 shadow-lg transition-all duration-200 hover:scale-105',
     className
   );
 
@@ -177,15 +168,44 @@ export const Avatar: React.FC<AvatarProps> = ({
     );
   }
 
+  // Use enhanced avatar system if member and allMembers are provided
+  const avatarInfo = member && allMembers 
+    ? generateAvatarInfo(member, allMembers)
+    : hashStringToColor(name);
+
   return (
     <div className={cn(
       baseStyles,
       'bg-gradient-to-br',
-      gradientColors[colorIndex],
-      'flex items-center justify-center font-semibold text-white'
+      avatarInfo.colorClass,
+      avatarInfo.textClass,
+      'flex items-center justify-center font-semibold'
     )}>
-      {initials}
+      {avatarInfo.initials}
     </div>
+  );
+};
+
+/**
+ * Avatar Component - Smart avatar with consistent colors and conflict resolution
+ */
+export const Avatar: React.FC<AvatarProps> = ({ 
+  name, 
+  src, 
+  size = 'md', 
+  className = '',
+  member,
+  allMembers
+}) => {
+  return (
+    <AvatarCore
+      name={name}
+      src={src}
+      size={size}
+      className={className}
+      member={member}
+      allMembers={allMembers}
+    />
   );
 };
 

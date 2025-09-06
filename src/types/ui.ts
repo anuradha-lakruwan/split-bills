@@ -45,6 +45,8 @@ export interface AvatarProps {
   src?: string;
   size?: AvatarSize;
   className?: string;
+  member?: { id: string; name: string };
+  allMembers?: { id: string; name: string }[];
 }
 
 export interface EmptyStateProps {
