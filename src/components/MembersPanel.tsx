@@ -172,12 +172,6 @@ export const MembersPanel = () => {
                           {member.email}
                         </p>
                       )}
-                      <div className="mt-1 flex items-center space-x-2 text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                        <span className={`font-semibold text-${stats.status.color}-600 dark:text-${stats.status.color}-400`}>
-                          {stats.status.label}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -194,7 +188,7 @@ export const MembersPanel = () => {
                 {/* Member Stats */}
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-3">
-                    <p className="text-sm text-blue-600 dark:text-blue-400">Amount Paid</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">Amount Contributed</p>
                     <p className="text-lg font-semibold text-blue-900 dark:text-blue-200">
                       {formatCurrency(stats.amountPaid)}
                     </p>
