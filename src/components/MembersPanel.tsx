@@ -162,7 +162,12 @@ export const MembersPanel = () => {
               <UI.Card key={member.id} hover className={ANIMATIONS.slideIn}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <UI.Avatar name={member.name} size="lg" />
+                    <UI.Avatar 
+                      name={member.name} 
+                      size="lg" 
+                      member={member}
+                      allMembers={currentGroup.members}
+                    />
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                         {member.name}

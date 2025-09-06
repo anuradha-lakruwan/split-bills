@@ -3,6 +3,7 @@
 import { useApp } from '@/context/AppContext';
 import { formatCurrency, calculateMemberBalance } from '@/utils';
 import { useSettlement } from '@/hooks/useSettlement';
+import { Avatar } from '@/components/UI';
 
 export const SettlementsPanel = () => {
   const { state, calculateSettlements } = useApp();
@@ -139,11 +140,12 @@ export const SettlementsPanel = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-red-600 dark:text-red-300">
-                            {fromMember?.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
+                        <Avatar 
+                          name={fromMember?.name || 'Unknown'} 
+                          size="md" 
+                          member={fromMember}
+                          allMembers={currentGroup.members}
+                        />
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {fromMember?.name}
@@ -159,11 +161,12 @@ export const SettlementsPanel = () => {
                       </div>
 
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-green-600 dark:text-green-300">
-                            {toMember?.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
+                        <Avatar 
+                          name={toMember?.name || 'Unknown'} 
+                          size="md" 
+                          member={toMember}
+                          allMembers={currentGroup.members}
+                        />
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {toMember?.name}
@@ -212,11 +215,13 @@ export const SettlementsPanel = () => {
               {creditors.map(({ member, balance }) => (
                 <div key={member.id} className="px-6 py-4 flex justify-between items-center">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-sm font-medium text-green-600 dark:text-green-300">
-                        {member.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+                    <Avatar 
+                      name={member.name} 
+                      size="sm" 
+                      member={member}
+                      allMembers={currentGroup.members}
+                      className="mr-3"
+                    />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {member.name}
                     </span>
@@ -242,11 +247,13 @@ export const SettlementsPanel = () => {
               {debtors.map(({ member, balance }) => (
                 <div key={member.id} className="px-6 py-4 flex justify-between items-center">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-sm font-medium text-red-600 dark:text-red-300">
-                        {member.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+                    <Avatar 
+                      name={member.name} 
+                      size="sm" 
+                      member={member}
+                      allMembers={currentGroup.members}
+                      className="mr-3"
+                    />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {member.name}
                     </span>
@@ -272,11 +279,13 @@ export const SettlementsPanel = () => {
               {settled.map(({ member }) => (
                 <div key={member.id} className="px-6 py-4 flex justify-between items-center">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        {member.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
+                    <Avatar 
+                      name={member.name} 
+                      size="sm" 
+                      member={member}
+                      allMembers={currentGroup.members}
+                      className="mr-3"
+                    />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {member.name}
                     </span>

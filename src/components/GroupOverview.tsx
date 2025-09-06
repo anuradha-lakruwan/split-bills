@@ -171,7 +171,12 @@ export const GroupOverview = () => {
                               <div className="flex items-center space-x-2 mt-2">
                                 {/* Payer Avatar */}
                                 <div className="relative">
-                                  <Avatar name={paidByMember?.name || 'Unknown'} size="sm" />
+                                  <Avatar 
+                                    name={paidByMember?.name || 'Unknown'} 
+                                    size="sm" 
+                                    member={paidByMember}
+                                    allMembers={currentGroup.members}
+                                  />
                                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
                                     <Icons.DollarSign className="w-1.5 h-1.5 text-white" />
                                   </div>
@@ -185,7 +190,12 @@ export const GroupOverview = () => {
                                   {participantMembers.map((participant, idx) => 
                                     participant && (
                                       <div key={participant.id} className="relative" style={{ zIndex: participantMembers.length - idx }}>
-                                        <Avatar name={participant.name} size="sm" />
+                                        <Avatar 
+                                          name={participant.name} 
+                                          size="sm" 
+                                          member={participant}
+                                          allMembers={currentGroup.members}
+                                        />
                                       </div>
                                     )
                                   )}
@@ -256,7 +266,12 @@ export const GroupOverview = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <Avatar name={member.name} size="md" />
+                          <Avatar 
+                            name={member.name} 
+                            size="md" 
+                            member={member}
+                            allMembers={currentGroup.members}
+                          />
                           <div>
                             <span className="font-medium text-gray-900 dark:text-white">
                               {member.name}
@@ -341,9 +356,19 @@ export const GroupOverview = () => {
                       <div className="block sm:hidden">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2" title={`${fromMember?.name} owes ${toMember?.name}`}>
-                            <Avatar name={fromMember?.name || 'Unknown'} size="sm" />
+                            <Avatar 
+                              name={fromMember?.name || 'Unknown'} 
+                              size="sm" 
+                              member={fromMember}
+                              allMembers={currentGroup.members}
+                            />
                             <Icons.ArrowRight className="w-4 h-4 text-blue-500" />
-                            <Avatar name={toMember?.name || 'Unknown'} size="sm" />
+                            <Avatar 
+                              name={toMember?.name || 'Unknown'} 
+                              size="sm" 
+                              member={toMember}
+                              allMembers={currentGroup.members}
+                            />
                           </div>
                           <div className="text-center">
                             <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
@@ -365,9 +390,19 @@ export const GroupOverview = () => {
                       {/* Desktop Layout */}
                       <div className="hidden sm:flex items-center justify-between">
                         <div className="flex items-center space-x-3" title={`${fromMember?.name} owes ${toMember?.name}`}>
-                          <Avatar name={fromMember?.name || 'Unknown'} size="md" />
+                          <Avatar 
+                            name={fromMember?.name || 'Unknown'} 
+                            size="md" 
+                            member={fromMember}
+                            allMembers={currentGroup.members}
+                          />
                           <Icons.ArrowRight className="w-5 h-5 text-blue-500 group-hover:text-blue-600 transition-colors" />
-                          <Avatar name={toMember?.name || 'Unknown'} size="md" />
+                          <Avatar 
+                            name={toMember?.name || 'Unknown'} 
+                            size="md" 
+                            member={toMember}
+                            allMembers={currentGroup.members}
+                          />
                         </div>
                         <div className="flex items-center space-x-4">
                           <p className="text-xl font-bold text-blue-600 dark:text-blue-400">

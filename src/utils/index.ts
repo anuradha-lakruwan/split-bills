@@ -163,3 +163,7 @@ export const debounce = <T extends (...args: unknown[]) => void>(
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
+// Re-export avatar utilities
+export { generateAvatarInfo, hashStringToColor } from './avatarUtils';
+export type { AvatarInfo } from './avatarUtils';
