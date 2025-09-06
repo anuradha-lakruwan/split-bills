@@ -114,13 +114,14 @@ export const validateEmail = (email: string): boolean => {
 
 // Utility to ensure monetary values are properly formatted
 export const sanitizeAmount = (amount: number): number => {
-  // Handle NaN, Infinity, and negative values
+  // Handle NaN, Infinity values
   if (!isFinite(amount) || isNaN(amount)) {
     return 0;
   }
   
   // Round to 2 decimal places to avoid floating point issues
-  return Math.round(Math.max(0, amount) * 100) / 100;
+  // Note: We DON'T use Math.max(0, amount) because negative balances are valid (debts)
+  return Math.round(amount * 100) / 100;
 };
 
 // Utility to validate expense data

@@ -19,7 +19,17 @@ export const SettlementsPanel = () => {
 
   const creditors = memberBalances.filter(mb => mb.balance > 0.01);
   const debtors = memberBalances.filter(mb => mb.balance < -0.01);
-  const settled = memberBalances.filter(mb => Math.abs(mb.balance) <= 0.01);
+  
+  // A member is truly "settled" only if they have no pending settlements at all
+  // Not just if their net balance is zero (they could still owe specific people)
+  const membersWithSettlements = new Set([
+    ...settlements.map(s => s.from),
+    ...settlements.map(s => s.to)
+  ]);
+  
+  const settled = memberBalances.filter(mb => 
+    Math.abs(mb.balance) <= 0.01 && !membersWithSettlements.has(mb.member.id)
+  );
 
   const exportSettlements = () => {
     const data = settlements.map(settlement => {

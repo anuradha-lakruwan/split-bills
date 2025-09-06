@@ -55,20 +55,28 @@ export const MembersPanel = () => {
 
   // Optimized member stats calculator
   const getMemberStats = (member: Member) => {
-    const balance = calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || []);
-    const expenses = getMemberExpenses(member.id, currentGroup.expenses);
-    const totalExpenses = Array.isArray(expenses) ? expenses.reduce((sum, exp) => sum + exp.amount, 0) : 0;
-    const isNeutral = Math.abs(balance) < 0.01;
-    const isPositive = balance > 0;
+    // Calculate net balance (what they owe or are owed)
+    const netBalance = calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || []);
+    
+    // Calculate total amount this member has actually paid out
+    const amountPaid = getMemberExpenses(member.id, currentGroup.expenses);
+    
+    // Calculate how much they owe (only if negative balance)
+    const amountOwes = netBalance < 0 ? Math.abs(netBalance) : 0;
+    
+    // Determine status
+    const isNeutral = Math.abs(netBalance) < 0.01;
+    const isPositive = netBalance > 0;
     
     const variant: BadgeVariant = isNeutral ? 'secondary' : isPositive ? 'success' : 'warning';
     
     return {
-      balance,
-      totalExpenses,
+      amountPaid,
+      amountOwes,
+      netBalance, // Keep for internal calculations
       status: {
         variant,
-        label: isNeutral ? 'Settled' : isPositive ? 'Owed Money' : 'Owes Money',
+        label: isNeutral ? 'Settled Up' : isPositive ? `Owed ${formatCurrency(netBalance)}` : `Owes ${formatCurrency(Math.abs(netBalance))}`,
         color: isNeutral ? 'blue' : isPositive ? 'green' : 'red'
       }
     };
@@ -165,9 +173,9 @@ export const MembersPanel = () => {
                         </p>
                       )}
                       <div className="mt-1 flex items-center space-x-2 text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Balance:</span>
+                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
                         <span className={`font-semibold text-${stats.status.color}-600 dark:text-${stats.status.color}-400`}>
-                          {Math.abs(stats.balance) < 0.01 ? 'Settled' : formatCurrency(Math.abs(stats.balance))}
+                          {stats.status.label}
                         </span>
                       </div>
                     </div>
@@ -186,16 +194,16 @@ export const MembersPanel = () => {
                 {/* Member Stats */}
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-3">
-                    <p className="text-sm text-blue-600 dark:text-blue-400">Total Expenses</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">Amount Paid</p>
                     <p className="text-lg font-semibold text-blue-900 dark:text-blue-200">
-                      {formatCurrency(stats.totalExpenses)}
+                      {formatCurrency(stats.amountPaid)}
                     </p>
                   </div>
                   
-                  <div className={`rounded-lg p-3 bg-gradient-to-br from-${stats.status.color}-50 to-${stats.status.color}-100 dark:from-${stats.status.color}-900/20 dark:to-${stats.status.color}-800/20`}>
-                    <p className={`text-sm text-${stats.status.color}-600 dark:text-${stats.status.color}-400`}>Balance</p>
-                    <p className={`text-lg font-semibold text-${stats.status.color}-900 dark:text-${stats.status.color}-200`}>
-                      {formatCurrency(Math.abs(stats.balance))}
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg p-3">
+                    <p className="text-sm text-orange-600 dark:text-orange-400">Amount Owes</p>
+                    <p className="text-lg font-semibold text-orange-900 dark:text-orange-200">
+                      {stats.amountOwes > 0 ? formatCurrency(stats.amountOwes) : '$0.00'}
                     </p>
                   </div>
                   
