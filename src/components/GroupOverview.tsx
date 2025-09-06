@@ -145,6 +145,10 @@ export const GroupOverview = () => {
               {recentExpenses.length > 0 ? (
                 recentExpenses.map((expense, index) => {
                   const paidByMember = currentGroup.members.find(m => m.id === expense.paidBy);
+                  const participantMembers = expense.participants
+                    .map(id => currentGroup.members.find(m => m.id === id))
+                    .filter(Boolean);
+                  
                   return (
                     <div key={expense.id} className={cn(
                       "p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300 group",
@@ -162,11 +166,35 @@ export const GroupOverview = () => {
                               <p className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {expense.description}
                               </p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Avatar name={paidByMember?.name || 'Unknown'} size="sm" />
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {paidByMember?.name} • {formatDate(expense.date)} • {expense.category}
-                                </p>
+                              
+                              {/* Visual Flow: Payer → Participants */}
+                              <div className="flex items-center space-x-2 mt-2">
+                                {/* Payer Avatar */}
+                                <div className="relative">
+                                  <Avatar name={paidByMember?.name || 'Unknown'} size="sm" />
+                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
+                                    <Icons.DollarSign className="w-1.5 h-1.5 text-white" />
+                                  </div>
+                                </div>
+                                
+                                {/* Arrow */}
+                                <Icons.ArrowRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                
+                                {/* Participant Avatars */}
+                                <div className="flex -space-x-1">
+                                  {participantMembers.map((participant, idx) => 
+                                    participant && (
+                                      <div key={participant.id} className="relative" style={{ zIndex: participantMembers.length - idx }}>
+                                        <Avatar name={participant.name} size="sm" />
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                                
+                                {/* Expense Details */}
+                                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                                  {formatDate(expense.date)} • {expense.category}
+                                </span>
                               </div>
                             </div>
                           </div>
