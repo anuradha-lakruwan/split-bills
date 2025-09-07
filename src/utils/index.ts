@@ -167,3 +167,6 @@ export const debounce = <T extends (...args: unknown[]) => void>(
 // Re-export avatar utilities
 export { generateAvatarInfo, hashStringToColor } from './avatarUtils';
 export type { AvatarInfo } from './avatarUtils';
+
+// Re-export PDF utilities
+export { exportToPDF, exportSettlementsToPDF, exportCompletePDF } from './pdfExport';

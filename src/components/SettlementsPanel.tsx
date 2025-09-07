@@ -5,6 +5,7 @@ import { formatCurrency, calculateMemberBalance } from '@/utils';
 import { useSettlement } from '@/hooks/useSettlement';
 import { Avatar } from '@/components/UI';
 import { SettlementExplanation } from './SettlementExplanation';
+import { exportCompletePDF, exportSettlementsToPDF } from '@/utils/pdfExport';
 
 export const SettlementsPanel = () => {
   const { state, calculateSettlements } = useApp();
@@ -34,27 +35,31 @@ export const SettlementsPanel = () => {
   );
 
   const exportSettlements = () => {
-    const data = settlements.map(settlement => {
-      const fromMember = currentGroup.members.find(m => m.id === settlement.from);
-      const toMember = currentGroup.members.find(m => m.id === settlement.to);
-      return {
-        from: fromMember?.name,
-        to: toMember?.name,
-        amount: settlement.amount
-      };
-    });
+    try {
+      exportCompletePDF(
+        currentGroup.name,
+        currentGroup.members,
+        currentGroup.expenses,
+        settlements,
+        currentGroup.paidSettlements || []
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
 
-    const csvContent = "data:text/csv;charset=utf-8," + 
-      "From,To,Amount\n" +
-      data.map(row => `${row.from},${row.to},${row.amount}`).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${currentGroup.name}-settlements.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const exportSettlementsOnly = () => {
+    try {
+      exportSettlementsToPDF(
+        currentGroup.name,
+        currentGroup.members,
+        settlements
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
   };
 
   if (currentGroup.expenses.length === 0) {
@@ -83,15 +88,26 @@ export const SettlementsPanel = () => {
           Settlements
         </h2>
         {settlements.length > 0 && (
-          <button
-            onClick={exportSettlements}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export CSV
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={exportSettlementsOnly}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export PDF
+            </button>
+            <button
+              onClick={exportSettlements}
+              className="inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-600 rounded-md shadow-sm text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 hover:bg-blue-100 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Full Report
+            </button>
+          </div>
         )}
       </div>
 

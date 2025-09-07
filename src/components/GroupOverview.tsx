@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn } from '@/utils';
+import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn, exportCompletePDF } from '@/utils';
 import { Icons } from './Icons';
 import { Card, Badge, Avatar, EmptyState, Button } from './UI';
 import { useSettlement } from '@/hooks/useSettlement';
@@ -35,6 +35,21 @@ export const GroupOverview = () => {
 
   const { totalExpenses, settlements, recentExpenses, memberCount, expenseCount } = groupStats;
 
+  const handleExportPDF = () => {
+    try {
+      exportCompletePDF(
+        currentGroup.name,
+        currentGroup.members,
+        currentGroup.expenses,
+        settlements,
+        currentGroup.paidSettlements || []
+      );
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in">
       {/* Enhanced Group Info Header */}
@@ -61,13 +76,28 @@ export const GroupOverview = () => {
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              {formatCurrency(totalExpenses)}
+          <div className="text-right space-y-3">
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                {formatCurrency(totalExpenses)}
+              </div>
+              <Badge variant="success" className="mt-2">
+                Total Expenses
+              </Badge>
             </div>
-            <Badge variant="success" className="mt-2">
-              Total Expenses
-            </Badge>
+            {expenseCount > 0 && (
+              <Button
+                onClick={handleExportPDF}
+                variant="secondary"
+                size="sm"
+                className="inline-flex items-center space-x-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Export PDF</span>
+              </Button>
+            )}
           </div>
         </div>
       </Card>
