@@ -76,9 +76,21 @@ export const Icons = {
     </svg>
   ),
 
+  ChevronUp: ({ className = "w-5 h-5", size }: IconProps) => (
+    <svg className={className} width={size} height={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+    </svg>
+  ),
+
   ArrowRight: ({ className = "w-5 h-5", size }: IconProps) => (
     <svg className={className} width={size} height={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  ),
+
+  Info: ({ className = "w-5 h-5", size }: IconProps) => (
+    <svg className={className} width={size} height={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
   ),
 
