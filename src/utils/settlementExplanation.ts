@@ -79,7 +79,7 @@ export const generateSettlementExplanation = (
   steps.push({
     id: `step-${stepCounter++}`,
     type: 'balance_calculation',
-    title: '⚖️ Current Balances',
+    title: 'Current Balances',
     description: `After analyzing ${expenses.length} expenses totaling ${formatCurrency(totalExpenseAmount)}, here's who owes what:`,
   });
 
@@ -99,7 +99,7 @@ export const generateSettlementExplanation = (
     steps.push({
       id: `step-${stepCounter++}`,
       type: 'balance_calculation',
-      title: '🎉 Everyone is settled up!',
+      title: 'Everyone is settled up!',
       description: 'All members have paid exactly their fair share.',
     });
     
@@ -117,7 +117,7 @@ export const generateSettlementExplanation = (
   steps.push({
     id: `step-${stepCounter++}`,
     type: 'balance_calculation',
-    title: '� Balance Summary',
+    title: 'Balance Summary',
     description: balanceDescriptions.join('\n'),
   });
 
@@ -135,8 +135,12 @@ export const generateSettlementExplanation = (
   steps.push({
     id: `step-${stepCounter++}`,
     type: 'settlement_optimization',
-    title: '� Optimization Algorithm: Greedy Matching',
-    description: `We use a greedy algorithm to minimize transactions. Instead of ${members.length * (members.length - 1)} possible payments between everyone, we match the largest amounts first to create the fewest transactions.`,
+    title: 'Greedy Algorithm Steps',
+    description: `1. Sort debts (largest first)
+2. Sort credits (largest first)  
+3. Match largest debt with largest credit
+4. Transfer min(debt, credit)
+5. Repeat until all = 0`,
   });
 
   // Generate optimal settlements
@@ -147,8 +151,10 @@ export const generateSettlementExplanation = (
   steps.push({
     id: `step-${stepCounter++}`,
     type: 'settlement_optimization',
-    title: '💡 Why This Works',
-    description: `By matching ${creditors.length} people who should receive money with ${debtors.length} people who owe money, we can settle everything with at most ${Math.min(creditors.length, debtors.length)} transactions (vs up to ${creditors.length * debtors.length} if everyone paid everyone).`,
+    title: 'Optimization Result',
+    description: `Without algorithm: Up to ${creditors.length * debtors.length} transactions
+With greedy: ${Math.min(creditors.length, debtors.length)} transactions
+Reduction: ${creditors.length * debtors.length > 0 ? Math.round((1 - Math.min(creditors.length, debtors.length) / (creditors.length * debtors.length)) * 100) : 0}%`,
   });
 
   const optimizationSteps: string[] = [];
@@ -180,7 +186,7 @@ export const generateSettlementExplanation = (
     steps.push({
       id: `step-${stepCounter++}`,
       type: 'settlement_optimization',
-      title: '� Optimal Transactions',
+      title: 'Optimal Transactions',
       description: optimizationSteps.join('\n'),
     });
 
@@ -188,8 +194,8 @@ export const generateSettlementExplanation = (
     steps.push({
       id: `step-${stepCounter++}`,
       type: 'final_result',
-      title: '✨ Result: Maximum Efficiency',
-      description: `${settlements.length} transaction${settlements.length === 1 ? '' : 's'} will settle ${formatCurrency(totalTransactionAmount)} in debts. This is the minimum number of payments needed to balance everyone.`,
+      title: 'Result',
+      description: `${settlements.length} transaction${settlements.length === 1 ? '' : 's'} settle ${formatCurrency(totalTransactionAmount)} in debts. Minimum payments needed.`,
     });
   }
 

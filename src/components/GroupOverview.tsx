@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn, exportCompletePDF } from '@/utils';
+import { formatCurrency, formatDate, getTotalExpenses, calculateMemberBalance, cn, exportSettlementsToPDF } from '@/utils';
 import { Icons } from './Icons';
 import { Card, Badge, Avatar, EmptyState, Button } from './UI';
 import { useSettlement } from '@/hooks/useSettlement';
@@ -37,12 +37,10 @@ export const GroupOverview = () => {
 
   const handleExportPDF = () => {
     try {
-      exportCompletePDF(
+      exportSettlementsToPDF(
         currentGroup.name,
         currentGroup.members,
-        currentGroup.expenses,
-        settlements,
-        currentGroup.paidSettlements || []
+        settlements
       );
     } catch (error) {
       console.error('Error exporting PDF:', error);
