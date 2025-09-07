@@ -69,6 +69,10 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
               expenses: group.expenses.filter(e => 
                 e.paidBy !== action.payload.memberId &&
                 !e.participants.includes(action.payload.memberId)
+              ),
+              paidSettlements: (group.paidSettlements || []).filter(settlement => 
+                settlement.from !== action.payload.memberId &&
+                settlement.to !== action.payload.memberId
               )
             }
           : group
@@ -316,7 +320,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    // Account for paid settlements (in cents)
+    // Account for paid settlements (in cents) - only for existing members
     if (Array.isArray(state.currentGroup.paidSettlements)) {
       state.currentGroup.paidSettlements.forEach(paidSettlement => {
         // Validate settlement data
@@ -324,15 +328,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return; // Skip invalid settlements
         }
         
+        // Skip settlements involving deleted members
+        if (!balancesCents.hasOwnProperty(paidSettlement.from) || !balancesCents.hasOwnProperty(paidSettlement.to)) {
+          return; // Skip settlements with non-existent members
+        }
+        
         const settlementAmountCents = Math.round(paidSettlement.amount * 100);
         
         // The person who received money should have less credit
-        if (paidSettlement.to && balancesCents.hasOwnProperty(paidSettlement.to)) {
+        if (paidSettlement.to) {
           balancesCents[paidSettlement.to] -= settlementAmountCents;
         }
         
         // The person who paid should have less debt
-        if (paidSettlement.from && balancesCents.hasOwnProperty(paidSettlement.from)) {
+        if (paidSettlement.from) {
           balancesCents[paidSettlement.from] += settlementAmountCents;
         }
       });

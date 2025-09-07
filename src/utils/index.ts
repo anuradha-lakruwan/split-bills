@@ -27,7 +27,7 @@ export const formatDate = (date: Date): string => {
 
 import { Expense, PaidSettlement } from '@/types';
 
-export const calculateMemberBalance = (memberId: string, expenses: Expense[], paidSettlements: PaidSettlement[] = []): number => {
+export const calculateMemberBalance = (memberId: string, expenses: Expense[], paidSettlements: PaidSettlement[] = [], validMemberIds?: string[]): number => {
   // Use integer arithmetic (cents) to avoid floating point issues
   let balanceCents = 0;
   
@@ -63,6 +63,11 @@ export const calculateMemberBalance = (memberId: string, expenses: Expense[], pa
       // Validate settlement data
       if (!settlement || typeof settlement.amount !== 'number') {
         return; // Skip invalid settlements
+      }
+      
+      // Skip settlements involving deleted members if validMemberIds is provided
+      if (validMemberIds && (!validMemberIds.includes(settlement.from) || !validMemberIds.includes(settlement.to))) {
+        return; // Skip settlements with deleted members
       }
       
       const settlementAmountCents = Math.round(settlement.amount * 100);

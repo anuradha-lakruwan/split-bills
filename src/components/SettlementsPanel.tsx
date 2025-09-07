@@ -15,9 +15,10 @@ export const SettlementsPanel = () => {
   if (!currentGroup) return null;
 
   const settlements = calculateSettlements();
+  const validMemberIds = currentGroup.members.map(m => m.id);
   const memberBalances = currentGroup.members.map(member => ({
     member,
-    balance: calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || [])
+    balance: calculateMemberBalance(member.id, currentGroup.expenses, currentGroup.paidSettlements || [], validMemberIds)
   }));
 
   const creditors = memberBalances.filter(mb => mb.balance > 0.01);

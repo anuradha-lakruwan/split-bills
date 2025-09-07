@@ -159,8 +159,14 @@ export const exportToPDF = (
     yPosition += 10;
   }
 
-  // Paid Settlements Section (if any)
-  if (paidSettlements.length > 0) {
+  // Paid Settlements Section (if any) - only include settlements with valid members
+  const validPaidSettlements = paidSettlements.filter(settlement => {
+    const fromMember = members.find(m => m.id === settlement.from);
+    const toMember = members.find(m => m.id === settlement.to);
+    return fromMember && toMember; // Only include if both members exist
+  });
+
+  if (validPaidSettlements.length > 0) {
     checkPageBreak(40);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
@@ -170,7 +176,7 @@ export const exportToPDF = (
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
 
-    paidSettlements.forEach((settlement, index) => {
+    validPaidSettlements.forEach((settlement, index) => {
       checkPageBreak(15);
       const fromMember = members.find(m => m.id === settlement.from)?.name || 'Unknown';
       const toMember = members.find(m => m.id === settlement.to)?.name || 'Unknown';
