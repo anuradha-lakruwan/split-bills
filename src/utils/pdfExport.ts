@@ -94,7 +94,10 @@ export const exportToPDF = (
     doc.setFont('helvetica', 'normal');
 
     members.forEach((member, index) => {
-      addWrappedText(`${index + 1}. ${member.name} (${member.email})`, margin + 5, 150);
+      const memberText = member.email 
+        ? `${index + 1}. ${member.name} (${member.email})`
+        : `${index + 1}. ${member.name}`;
+      addWrappedText(memberText, margin + 5, 150);
     });
     yPosition += 10;
   }
