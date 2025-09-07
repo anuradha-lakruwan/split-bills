@@ -4,6 +4,7 @@ import { useApp } from '@/context/AppContext';
 import { formatCurrency, calculateMemberBalance } from '@/utils';
 import { useSettlement } from '@/hooks/useSettlement';
 import { Avatar } from '@/components/UI';
+import { SettlementExplanation } from './SettlementExplanation';
 
 export const SettlementsPanel = () => {
   const { state, calculateSettlements } = useApp();
@@ -298,6 +299,9 @@ export const SettlementsPanel = () => {
             </div>
           </div>
         )}
+
+        {/* Settlement Explanation */}
+        <SettlementExplanation />
       </div>
     </div>
   );
