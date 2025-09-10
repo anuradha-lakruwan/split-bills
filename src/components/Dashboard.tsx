@@ -8,6 +8,7 @@ import { MembersPanel } from './MembersPanel';
 import { ExpensesPanel } from './ExpensesPanel';
 import { SettlementsPanel } from './SettlementsPanel';
 import { Icons } from './Icons';
+import { ThemeToggle } from './ThemeToggle';
 
 type ActiveTab = 'overview' | 'members' | 'expenses' | 'settlements';
 
@@ -79,8 +80,11 @@ export const Dashboard = () => {
                 <GroupSelector />
               </div>
             </div>
-            <div className="sm:hidden">
-              <GroupSelector />
+            <div className="flex items-center space-x-3">
+              <ThemeToggle variant="icon" />
+              <div className="sm:hidden">
+                <GroupSelector />
+              </div>
             </div>
           </div>
         </div>
