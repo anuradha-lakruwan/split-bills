@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+DELETED_USER_SETTLEMENTS_FIX.md
+PDF_EXPORT_DOCUMENTATION.md
