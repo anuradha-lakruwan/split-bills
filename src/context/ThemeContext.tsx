@@ -14,17 +14,17 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system');
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>('dark');
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('dark');
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage or dark mode preference
   useEffect(() => {
     const stored = localStorage.getItem('theme') as Theme;
     if (stored && ['light', 'dark', 'system'].includes(stored)) {
       setTheme(stored);
     } else {
-      // Default to system if no stored preference
-      setTheme('system');
+      // Default to dark mode if no stored preference
+      setTheme('dark');
     }
   }, []);
 
@@ -73,8 +73,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const toggleTheme = () => {
     setTheme(current => {
       if (current === 'light') return 'dark';
-      if (current === 'dark') return 'system';
-      return 'light'; // system -> light
+      if (current === 'dark') return 'light';
+      return 'light'; // system -> light (if somehow in system mode)
     });
   };
 
