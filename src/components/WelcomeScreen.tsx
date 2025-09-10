@@ -6,6 +6,7 @@ import { generateId } from '@/utils';
 import { Group } from '@/types';
 import { Icons } from './Icons';
 import { Card, Button } from './UI';
+import { ThemeToggle } from './ThemeToggle';
 
 export const WelcomeScreen = () => {
   const { dispatch } = useApp();
@@ -84,6 +85,11 @@ export const WelcomeScreen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
+      {/* Theme Toggle - Fixed Position */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle variant="icon" />
+      </div>
+
       {/* Modern Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-float"></div>

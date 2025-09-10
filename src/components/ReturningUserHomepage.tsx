@@ -6,6 +6,7 @@ import { formatCurrency, getTotalExpenses, formatDate } from '@/utils';
 import { Icons } from './Icons';
 import { Card, Button } from './UI';
 import { Group } from '@/types';
+import { ThemeToggle } from './ThemeToggle';
 
 export const ReturningUserHomepage = () => {
   const { state, dispatch } = useApp();
@@ -101,7 +102,12 @@ export const ReturningUserHomepage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+          {/* Theme Toggle */}
+          <div className="absolute top-4 right-4">
+            <ThemeToggle variant="icon" />
+          </div>
+          
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
