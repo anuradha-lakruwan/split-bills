@@ -33,6 +33,11 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Enhance border visibility in light mode */
+html:not(.dark) .border-gray-200 {
+  border-color: rgb(209 213 219) !important; /* gray-300 instead of gray-200 */
+}
+
 /* Custom component styles */
 .btn-primary {
   display: inline-flex;
